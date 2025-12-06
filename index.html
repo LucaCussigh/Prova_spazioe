@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Laboratorio delle Avventure: Missione Spazio</title>
+    
+    <script src="https://unpkg.com/jspsych@7.3.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
+    <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        /* 2. IL TRUCCO E PARRUCCO (CSS) */
+        
+        body {
+            /* Generiamo un cielo stellato con il codice, senza immagini esterne! */
+            background-color: #050f2c;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            color: white;
+            font-family: 'Verdana', sans-serif;
+            overflow: hidden; /* Evita barre di scorrimento fastidiose */
+        }
+
+        /* La barra di progresso in alto */
+        .progress-bar-container {
+            width: 80%;
+            margin: 20px auto;
+            border-bottom: 2px dashed rgba(255,255,255,0.3);
+            position: relative;
+            height: 50px;
+        }
+
+        .rocket-icon {
+            height: 50px;
+            position: absolute;
+            bottom: -25px; /* Posiziona il razzo sulla linea */
+            left: 10%; /* CAMBIA QUESTO VALORE PER MUOVERE IL RAZZO (es. 50%, 90%) */
+            transition: left 1s ease-in-out; /* Fa scivolare il razzo dolcemente */
+            transform: rotate(45deg);
+        }
+
+        /* Il contenitore centrale del gioco */
+        .game-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 50px;
+        }
+
+        /* L'Avatar che galleggia */
+        .avatar-container img {
+            width: 180px;
+            filter: drop-shadow(0 0 15px rgba(100, 200, 255, 0.6)); /* Alone luminoso */
+            animation: float 4s ease-in-out infinite; /* Animazione Galleggiamento */
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Il fumetto del parlato */
+        .speech-bubble {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            padding: 30px;
+            font-size: 24px;
+            max-width: 400px;
+            position: relative;
+            text-align: left;
+            line-height: 1.5;
+        }
+        
+        /* La freccetta del fumetto */
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            border: 10px solid transparent;
+            border-right-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Bottoni personalizzati (Pietre Lunari) */
+        .jspsych-btn-custom {
+            background: linear-gradient(145deg, #1e3c72, #2a5298);
+            color: white;
+            border: 2px solid #8dc6ff;
+            border-radius: 15px;
+            padding: 15px 30px;
+            font-size: 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 0 #0d2550; /* Effetto 3D */
+        }
+
+        .jspsych-btn-custom:hover {
+            transform: translateY(-5px); /* Si alza quando ci passi sopra */
+            background: linear-gradient(145deg, #2a5298, #1e3c72);
+            box-shadow: 0 9px 0 #0d2550;
+        }
+
+        .jspsych-btn-custom:active {
+            transform: translateY(2px); /* Si schiaccia quando clicchi */
+            box-shadow: 0 2px 0 #0d2550;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="progress-bar-container">
+        <img src="razzo.png" class="rocket-icon" id="myRocket">
+    </div>
+
+    <div id="jspsych-target" style="height: 100vh; display: flex; flex-direction: column; justify-content: center;"></div>
+
+</body>
+
+<script>
+    // 3. IL CERVELLO (JAVASCRIPT)
+
+    // Inizializza jsPsych dicendogli di usare il div "jspsych-target"
+    const jsPsych = initJsPsych({
+        display_element: 'jspsych-target',
+        on_finish: function() {
+            jsPsych.data.displayData(); // Alla fine mostra i dati grezzi a schermo
+        }
+    });
+
+    var timeline = [];
+
+    // --- SCHERMATA 1: BENVENUTO ---
+    var benvenuto = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `
+            <h1 style="font-size: 50px; text-shadow: 0 0 10px #4facfe;">🚀 Missione Pronta!</h1>
+            <p style="font-size: 24px;">Ciao esploratore, sei pronto a partire?</p>
+            <br>
+        `,
+        choices: ['PARTIAMO!'],
+        button_html: '<button class="jspsych-btn-custom" style="background: linear-gradient(145deg, #11998e, #38ef7d); border-color: #38ef7d;">%choice%</button>',
+        on_start: function() {
+            // All'inizio il razzo è a sinistra
+            document.getElementById('myRocket').style.left = '10%'; 
+        }
+    };
+    timeline.push(benvenuto);
+
+    // --- SCHERMATA 2: LA DOMANDA CON AVATAR ---
+    var domanda_spazio = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `
+            <div class="game-area">
+                <div class="avatar-container">
+                    <img src="robot.png">
+                </div>
+                <div class="speech-bubble">
+                    <strong>Capitano Robot dice:</strong><br>
+                    "Abbiamo appena attraversato una tempesta di meteoriti! <br><br>
+                    <strong>Quanto è stato difficile per te?</strong>"
+                </div>
+            </div>
+            <br><br>
+        `,
+        choices: ['Molto Facile 😄', 'Un po\' difficile 😐', 'Difficilissimo! 😫'],
+        button_html: '<button class="jspsych-btn-custom">%choice%</button>',
+        on_start: function() {
+            // Il razzo si sposta a metà strada!
+            document.getElementById('myRocket').style.left = '50%'; 
+        },
+        data: {
+            task_part: 'valutazione_difficolta'
+        }
+    };
+    timeline.push(domanda_spazio);
+
+    // --- SCHERMATA 3: FINE ---
+    var fine = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `
+            <h1 style="font-size: 40px; color: #ffeb3b;">Missione Compiuta! 🌟</h1>
+            <p>Grazie per aver aiutato la scienza.</p>
+        `,
+        choices: "NO_KEYS", // Nessun tasto, finisce qui
+        on_start: function() {
+            // Il razzo arriva alla fine!
+            document.getElementById('myRocket').style.left = '90%'; 
+        }
+    };
+    timeline.push(fine);
+
+    // Avvia tutto
+    jsPsych.run(timeline);
+
+</script>
+</html>
