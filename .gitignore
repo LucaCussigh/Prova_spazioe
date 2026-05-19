@@ -1,0 +1,65 @@
+# Quarto output
+_quarto.yml
+_site/
+_freeze/
+.quarto/
+/_html/
+/*.html
+
+# R output and artifacts
+.Rhistory
+.RData
+.Ruserdata
+*.Rout
+*.Rout.save
+.Rproj.user/
+*.Rproj
+
+# Data files (if too large)
+data/*.csv
+data/*.xlsx
+data/*.xls
+!data/.gitkeep
+
+# Generated plots and reports
+outputs/
+figures/
+plots/
+reports/
+*.pdf
+
+# Compiled documents
+*.docx
+*.odt
+
+# System files
+.DS_Store
+.Thumbs.db
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+*~
+*.swp
+*.swo
+
+# IDE
+.RStudio.desktop
+.vscode/settings.json
+
+# Node modules (if using dependencies)
+node_modules/
+
+# Cache
+.cache/
+
+# Build artifacts
+dist/
+build/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
