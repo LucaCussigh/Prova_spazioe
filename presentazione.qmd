@@ -1,0 +1,623 @@
+---
+title: "Analisi dei Dati: Una Prospettiva Scientifica"
+subtitle: "Da Dati Grezzi a Insights Significativi"
+author: "Laboratorio di Data Science"
+date: today
+format:
+  revealjs:
+    width: 1200
+    height: 675
+    margin: 0.2
+    slide-number: true
+    transition: fade
+    background-transition: fade
+    theme: [default, custom.scss]
+    footer: "© 2025 - Laboratorio di Data Science"
+    self-contained: false
+    embed-resources: false
+execute:
+  echo: true
+  eval: true
+  warning: false
+  message: false
+---
+
+# Benvenuti
+
+## Introduzione al Corso
+
+- **Obiettivo**: Comprendere il flusso completo dell'analisi dati
+- **Metodologia**: Dall'acquisizione dati alla comunicazione dei risultati
+- **Strumenti**: R, RStudio, Quarto per la riproducibilità
+- **Durata**: Percorso strutturato in fasi sequenziali
+
+## Struttura del Corso
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Fase 1: Preparazione**
+- Data Cleaning
+- Statistiche Descrittive
+
+**Fase 2: Esplorazione**
+- Analisi Univariata
+- Correlazioni
+:::
+
+::: {.column width="50%"}
+**Fase 3: Modellazione**
+- Regressione
+- Classificazione
+
+**Fase 4: Comunicazione**
+- Visualizzazione
+- Interpretazione
+:::
+
+::::
+
+---
+
+# Fase 1: Data Cleaning e Statistiche Descrittive
+
+## Caricamento dei Dati
+
+```{r setup, include=FALSE}
+# Setup iniziale
+library(tidyverse)
+library(summarytools)
+library(knitr)
+
+# Configurazione opzioni chunk
+opts_chunk$set(
+  echo = TRUE,
+  eval = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 10,
+  fig.height = 6,
+  dpi = 100
+)
+```
+
+- **Primo passo**: Importare i dati nel nostro ambiente R
+- **Formati supportati**: CSV, Excel, JSON, Database
+- **Validazione**: Controllare dimensioni, tipi di variabili
+
+```{r data_loading}
+# Caricamento dei dati
+# df <- read.csv("data/dataset.csv")
+# str(df)  # Visualizza struttura
+# head(df) # Mostra prime righe
+```
+
+## Esplorazione Iniziale
+
+- **Dimensioni**: Numero di righe e colonne
+- **Tipi di dati**: Numerici, categorici, temporali
+- **Valori mancanti**: Identificazione e quantificazione
+- **Outliers**: Valori anomali potenziali
+
+```{r data_exploration}
+# Informazioni generali sul dataset
+# dim(df)              # Dimensioni
+# colnames(df)         # Nome colonne
+# sapply(df, class)    # Tipo di dati
+# colSums(is.na(df))   # Valori mancanti per colonna
+```
+
+## Pulizia dei Dati - Parte 1
+
+**Gestione dei Valori Mancanti:**
+- Rimozione completa (se pochi)
+- Imputazione (media, mediana, valore predetto)
+- Strategie specifiche per tipo di variabile
+
+```{r missing_values}
+# Analisi e gestione valori mancanti
+# missing_summary <- colSums(is.na(df))
+# missing_pct <- round(missing_summary/nrow(df)*100, 2)
+# 
+# # Visualizzazione
+# barplot(missing_pct, horiz = TRUE, 
+#         main = "Percentuale di Valori Mancanti",
+#         xlab = "Percentuale (%)")
+```
+
+## Pulizia dei Dati - Parte 2
+
+**Rimozione Duplicati e Outliers:**
+- Identificazione di righe duplicate
+- Strategie per outliers (rimozione, trasformazione)
+- Validazione logica tra variabili
+
+```{r duplicates_outliers}
+# Rimozione duplicati
+# df <- df[!duplicated(df), ]
+#
+# # Identificazione outliers (metodo IQR)
+# Q1 <- quantile(df$variabile, 0.25, na.rm = TRUE)
+# Q3 <- quantile(df$variabile, 0.75, na.rm = TRUE)
+# IQR <- Q3 - Q1
+# outliers <- df$variabile < (Q1 - 1.5*IQR) | df$variabile > (Q3 + 1.5*IQR)
+```
+
+## Standardizzazione e Trasformazione
+
+- **Normalizzazione**: Conversione a scala comune (0-1 o z-score)
+- **Trasformazioni matematiche**: Log, radice quadrata per dati skewed
+- **Codifica variabili categoriche**: One-hot encoding, label encoding
+- **Feature engineering**: Creazione di nuove variabili
+
+```{r normalization}
+# Normalizzazione (0-1)
+# normalize_minmax <- function(x) {
+#   (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+# }
+#
+# # Standardizzazione (z-score)
+# df_scaled <- scale(df[, numeric_cols])
+```
+
+## Statistiche Descrittive - Misure Centrali
+
+**Tendenza Centrale:**
+- **Media**: Somma/n (sensibile agli outliers)
+- **Mediana**: Valore centrale (robusta)
+- **Moda**: Valore più frequente
+
+```{r descriptive_stats_central}
+# Misure di tendenza centrale
+# mean(df$variabile, na.rm = TRUE)
+# median(df$variabile, na.rm = TRUE)
+# mode_val <- names(sort(table(df$variabile), decreasing = TRUE))[1]
+```
+
+## Statistiche Descrittive - Dispersione
+
+**Misure di Variabilità:**
+- **Range**: Massimo - Minimo
+- **Varianza**: Media delle deviazioni quadrate
+- **Deviazione Standard**: Radice della varianza
+- **IQR**: Intervallo interquartile (Q3-Q1)
+
+```{r descriptive_stats_dispersion}
+# Misure di dispersione
+# range <- max(df$variabile, na.rm = TRUE) - min(df$variabile, na.rm = TRUE)
+# var <- var(df$variabile, na.rm = TRUE)
+# sd <- sd(df$variabile, na.rm = TRUE)
+# IQR <- IQR(df$variabile, na.rm = TRUE)
+```
+
+## Statistiche Descrittive - Forma
+
+**Asimmetria e Curtosi:**
+- **Skewness**: Asimmetria della distribuzione
+  - Negativa: coda sinistra
+  - Positiva: coda destra
+- **Kurtosis**: Pesantezza delle code
+
+```{r descriptive_stats_shape}
+# Libreria necessaria
+# library(moments)
+#
+# # Asimmetria
+# skewness(df$variabile, na.rm = TRUE)
+#
+# # Curtosi
+# kurtosis(df$variabile, na.rm = TRUE)
+```
+
+## Visualizzazione Distribuzioni Univariate
+
+```{r univariate_viz}
+# # Istogramma
+# hist(df$variabile, 
+#      main = "Distribuzione Variabile",
+#      xlab = "Valore", ylab = "Frequenza",
+#      col = "steelblue", breaks = 30)
+#
+# # Box plot
+# boxplot(df$variabile, 
+#         main = "Box Plot",
+#         ylab = "Valore")
+```
+
+- **Istogramma**: Frequenza dei valori in classi
+- **Box plot**: Quartili e outliers
+- **Density plot**: Stima della densità di probabilità
+- **Q-Q plot**: Normalità della distribuzione
+
+## Tabelle Riepilogative
+
+```{r summary_tables}
+# Tabella riepilogativa con summarytools
+# library(summarytools)
+# 
+# dfSummary(df, 
+#          style = "grid",
+#          graph.col = FALSE,
+#          plain.ascii = FALSE)
+```
+
+- **Statistiche per gruppo**: Media, SD per categorie
+- **Tavole di contingenza**: Frequenze congiunte
+- **Correlazioni iniziali**: Prime relazioni tra variabili
+
+---
+
+# Fase 2: Analisi Univariata e Bivariate
+
+## Analisi Univariata - Variabili Numeriche
+
+**Indicatori Principali:**
+- Distribuzione: forma, asimmetria, curtosi
+- Valori estremi: range, outliers
+- Concentrazione: varianza, coefficiente di variazione
+- Normalità: test di Shapiro-Wilk, Kolmogorov-Smirnov
+
+```{r univariate_numeric}
+# # Test di normalità
+# shapiro.test(df$variabile)
+#
+# # Statistiche complete
+# summary(df$variabile)
+```
+
+## Analisi Univariata - Variabili Categoriche
+
+**Distribuzioni di Frequenza:**
+- Conteggi assoluti: frequenze per categoria
+- Frequenze relative: proporzioni percentuali
+- Visualizzazione: grafici a barre, pie charts
+- Concentrazione: indice di eterogeneità
+
+```{r univariate_categorical}
+# # Tabella di frequenza
+# table(df$variabile_categorica)
+#
+# # Grafico a barre
+# barplot(table(df$variabile_categorica),
+#         main = "Distribuzione Categoria",
+#         xlab = "Categoria", ylab = "Frequenza")
+```
+
+## Correlazioni Bivariate
+
+**Misure di Associazione:**
+- **Numeriche**: Correlazione di Pearson, Spearman, Kendall
+- **Categoriche**: Chi-quadro, Cramer's V
+- **Miste**: Correlazione poliserica, biseriale
+
+```{r bivariate_correlation}
+# # Matrice di correlazione
+# cor_matrix <- cor(df[, numeric_cols], 
+#                   use = "complete.obs",
+#                   method = "pearson")
+#
+# # Correlazione di Spearman (robusta agli outliers)
+# cor(df$var1, df$var2, method = "spearman")
+```
+
+## Visualizzazione Relazioni Bivariate
+
+```{r bivariate_viz}
+# # Scatter plot
+# plot(df$var1, df$var2,
+#      main = "Relazione tra due Variabili",
+#      xlab = "Variabile 1", ylab = "Variabile 2",
+#      pch = 19, col = rgb(0,0,1,0.3))
+#
+# # Aggiunta linea di regressione
+# abline(lm(var2 ~ var1, data = df), col = "red", lwd = 2)
+```
+
+- **Scatter plot**: Nube di punti per due variabili
+- **Heatmap di correlazione**: Mappa colori delle correlazioni
+- **Mosaic plot**: Relazioni categoriche
+- **Linea di regressione**: Trend visivo
+
+---
+
+# Fase 3: Analisi Multivariata
+
+## Regressione Lineare Semplice
+
+**Modello Teorico:**
+$$Y_i = \beta_0 + \beta_1 X_i + \epsilon_i$$
+
+- $\beta_0$: Intercetta (valore quando X=0)
+- $\beta_1$: Coefficiente di regressione (effetto di X su Y)
+- $\epsilon_i$: Termine d'errore
+
+```{r linear_regression_simple}
+# # Modello di regressione semplice
+# model <- lm(var_dipendente ~ var_indipendente, data = df)
+#
+# # Sommario risultati
+# summary(model)
+#
+# # Coefficienti
+# coef(model)
+```
+
+## Regressione Lineare Multipla
+
+**Estensione con più predittori:**
+$$Y_i = \beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + ... + \beta_p X_{pi} + \epsilon_i$$
+
+**Assunzioni del Modello:**
+- Linearità della relazione
+- Indipendenza degli errori
+- Omoschedasticità (varianza costante)
+- Normalità degli errori
+- Assenza di multicollinearità
+
+```{r linear_regression_multiple}
+# # Modello multivariato
+# model_multi <- lm(var_dipendente ~ var1 + var2 + var3, data = df)
+#
+# # Summary
+# summary(model_multi)
+#
+# # Valutazione assunzioni
+# par(mfrow = c(2, 2))
+# plot(model_multi)
+```
+
+## Diagnostica del Modello
+
+**Controllo Assunzioni:**
+- **Q-Q plot**: Normalità dei residui
+- **Residuals vs Fitted**: Omoschedasticità e linearità
+- **Scale-Location**: Varianza costante
+- **Residuals vs Leverage**: Punti influenti
+
+```{r model_diagnostics}
+# # Valori predetti e residui
+# predictions <- predict(model)
+# residuals <- residuals(model)
+#
+# # R-squared e adjusted R-squared
+# summary(model)$r.squared
+# summary(model)$adj.r.squared
+#
+# # Test F
+# anova(model)
+```
+
+## Validazione del Modello
+
+**Metriche di Performance:**
+- **R²**: Proporzione di varianza spiegata (0-1)
+- **Adjusted R²**: Corrette per numero di predittori
+- **RMSE**: Radice dell'errore quadratico medio
+- **MAE**: Errore assoluto medio
+
+```{r model_validation}
+# library(Metrics)
+#
+# # RMSE
+# rmse(actual = df$var_reale, predicted = predictions)
+#
+# # MAE
+# mae(actual = df$var_reale, predicted = predictions)
+#
+# # Validazione incrociata (k-fold)
+# library(caret)
+# train_control <- trainControl(method = "cv", number = 5)
+```
+
+## Classificazione
+
+**Problemi di Classificazione Binaria:**
+- Logistica: Probabilità tra 0 e 1
+- Alberi decisionali: Regole interpretabili
+- SVM: Separazione in spazi ad alta dimensione
+- Ensemble: Combinazioni di modelli
+
+```{r classification}
+# # Regressione logistica
+# model_logit <- glm(classe ~ var1 + var2,
+#                    family = binomial(link = "logit"),
+#                    data = df)
+#
+# # Probabilità predette
+# probs <- predict(model_logit, type = "response")
+#
+# # Classificazione (soglia 0.5)
+# predictions <- ifelse(probs > 0.5, 1, 0)
+```
+
+---
+
+# Fase 4: Comunicazione e Visualizzazione
+
+## Principi di Visualizzazione Efficace
+
+**Regole Fondamentali:**
+- Semplicità: Eliminare elementi non necessari
+- Accuratezza: Rappresentare correttamente i dati
+- Contesto: Fornire informazioni di sfondo
+- Audience: Adattarsi al pubblico di riferimento
+
+**Evitare:**
+- Grafici 3D quando non necessari
+- Troppe dimensioni in un grafico
+- Scale ingannevoli (assi non proporzionati)
+- Colori confusionari (max 5-6 colori)
+
+## Visualizzazioni Comuni
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Per Distribuzioni:**
+- Istogramma
+- Box plot
+- Violin plot
+- Density plot
+
+**Per Relazioni:**
+- Scatter plot
+- Linea di regressione
+- Bubble chart
+:::
+
+::: {.column width="50%"}
+**Per Categorie:**
+- Grafico a barre
+- Grafico a torta (uso limitato)
+- Grouped bar chart
+- Stacked bar chart
+
+**Per Serie Temporali:**
+- Line plot
+- Area plot
+- Autocorrelation plot
+:::
+
+::::
+
+## Ggplot2: Grammatica della Grafica
+
+```{r ggplot_intro}
+# library(ggplot2)
+#
+# # Struttura di base
+# ggplot(df, aes(x = var1, y = var2)) +
+#   geom_point() +
+#   geom_smooth(method = "lm") +
+#   theme_minimal() +
+#   labs(title = "Titolo Grafico",
+#        x = "Asse X", y = "Asse Y")
+#
+# # Aggiunta di colori per categoria
+# ggplot(df, aes(x = var1, y = var2, color = categoria)) +
+#   geom_point(size = 3) +
+#   scale_color_brewer(palette = "Set1") +
+#   theme_minimal()
+```
+
+**Componenti:**
+- Data: Dataset di riferimento
+- Aesthetics: Mapping variabili → canali visivi
+- Geometries: Tipo di rappresentazione
+- Scales: Range valori
+- Themes: Stile complessivo
+
+## Visualizzazioni Avanzate
+
+```{r advanced_viz}
+# # Violin plot per distribuzioni per gruppo
+# ggplot(df, aes(x = categoria, y = variabile, fill = categoria)) +
+#   geom_violin(alpha = 0.7) +
+#   geom_boxplot(width = 0.2, alpha = 0.9) +
+#   theme_minimal()
+#
+# # Heatmap per correlazioni
+# library(reshape2)
+# corr_melted <- melt(cor_matrix)
+# ggplot(corr_melted, aes(x = Var1, y = Var2, fill = value)) +
+#   geom_tile() +
+#   scale_fill_gradient2(low = "blue", mid = "white", high = "red",
+#                        limits = c(-1, 1))
+```
+
+**Tipi Avanzati:**
+- Violin plot: Distribuzione + box plot combinati
+- Heatmap: Correlazioni in formato matriciale
+- Faceted plots: Grafici ripetuti per sottogruppi
+- Interactive plots: Con plotly o shiny
+
+## Interpretazione e Comunicazione
+
+**Passaggi Finali:**
+1. **Sintesi**: Riassumere i risultati principali
+2. **Significato**: Spiegare cosa significano statisticamente
+3. **Implicazioni**: Cosa comporta per il problema reale
+4. **Limitazioni**: Riconoscere vincoli e assunzioni
+5. **Raccomandazioni**: Azioni suggerite
+
+```{r interpretation}
+# # Tabella riepilogativa risultati
+# results_summary <- data.frame(
+#   Metrica = c("R-squared", "RMSE", "P-value"),
+#   Valore = c(round(r2, 3), round(rmse_val, 3), round(pval, 4)),
+#   Interpretazione = c("Varianza spiegata", "Errore medio", "Significatività")
+# )
+```
+
+## Presentazione dei Risultati
+
+**Struttura di un Report Efficace:**
+- **Abstract**: Sintesi esecutiva (1-2 paragrafi)
+- **Introduzione**: Contesto e obiettivo
+- **Metodologia**: Dati e metodi utilizzati
+- **Risultati**: Findings principali con grafici
+- **Discussione**: Interpretazione e limitazioni
+- **Conclusioni**: Punti chiave e prospettive
+
+## Best Practices
+
+- 📊 **Usa grafici invece di tabelle** per visualizzare trend
+- 📝 **Titoli e assi chiari** e autoesplicativi
+- 🎨 **Colori significativi**: convezione (es. rosso=negativo)
+- ♿ **Accessibilità**: Contrasto sufficiente, font leggibile
+- 🔍 **Dettaglio**: Didascalie complete con informazioni n
+- ✅ **Coerenza**: Stile uniforme tra visualizzazioni
+
+---
+
+# Conclusioni
+
+## Riassunto del Percorso
+
+**Dalle Fasi Affrontate:**
+
+1. ✅ **Data Cleaning**: Preparazione e qualità dei dati
+2. ✅ **Analisi Descrittiva**: Comprensione delle distribuzioni
+3. ✅ **Analisi Univariata**: Comportamento singole variabili
+4. ✅ **Analisi Multivariata**: Relazioni e modelli predittivi
+5. ✅ **Comunicazione**: Visualizzazione e interpretazione
+
+## Lezioni Chiave
+
+- **Qualità prima di quantità**: Dati puliti sono essenziali
+- **Esplorare prima di modellare**: Capire i dati è fondamentale
+- **Validare i risultati**: Non fidarsi ciecamente dei modelli
+- **Comunicare chiaramente**: I risultati devono essere comprensibili
+- **Documentare il processo**: Riproducibilità è cruciale
+
+## Risorse e Approfondimenti
+
+- **R for Data Science**: Wickham & Grolemund (2017)
+- **Statistical Rethinking**: McElreath (2020)
+- **ggplot2 Essentials**: Wickham
+- **Quarto Documentation**: https://quarto.org/
+- **Repository GitHub**: Codice e dataset disponibili
+
+## Contatti e Domande
+
+```
+📧 Email: laboratorio@unipd.it
+🌐 Repository: github.com/laboratorio-data-science
+📚 Documentazione: docs.labdatascience.it
+```
+
+**Grazie per l'attenzione!**
+
+---
+
+::: {.notes}
+# Note di Presentazione
+
+Queste note non appariranno nella presentazione ma possono essere utili durante la presentazione:
+
+- Enfatizzare l'importanza della qualità dei dati
+- Mostrare esempi reali durante la presentazione
+- Incoraggiare domande durante ogni sezione
+- Fornire codice R completo nei link repository
+- Suggerire letture ulteriori per approfondimenti
+:::
